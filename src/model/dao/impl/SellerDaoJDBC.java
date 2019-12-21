@@ -123,7 +123,7 @@ public class SellerDaoJDBC implements SellerDao {
 		seller.setEmail(rs.getString("Email"));
 		seller.setBaseSalary(rs.getDouble("BaseSalary"));
 		Calendar x = Calendar.getInstance();
-		x.setTimeInMillis(rs.getDate("BirthDate").getTime());
+		x.setTimeInMillis(new java.util.Date(rs.getTimestamp("BirthDate").getTime()).getTime());
 		seller.setBirthDate(x);
 		seller.setDepartment(dep);
 		return seller;
