@@ -2,10 +2,13 @@ package gui;
 
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -128,15 +131,36 @@ public class SellerFormController implements Initializable {
 	}
 
 	private Seller getFormData() {
+		Seller sel = new Seller();
 		ValidateException exception = new ValidateException("Validation error");
+		sel.setId(Utils.tryParseToInt(txtId.getText()));
 		if (txtName.getText() == null || txtName.getText().trim().equals("")) {
 			exception.addError("name", "Field can't be empty");
 		}
-		Seller dep = new Seller(Utils.tryParseToInt(txtId.getText()), txtName.getText());
+		sel.setName(txtName.getText());
+		if (txtEmail.getText() == null || txtEmail.getText().trim().equals("")) {
+			exception.addError("email", "Field can't be empty");
+		}
+		sel.setEmail(txtEmail.getText());
+		if (dpBirthDate.getValue() == null) {
+			exception.addError("birthDate", "Field can't be empty");
+		} else {
+			Instant instant = Instant.from(dpBirthDate.getValue().atStartOfDay(ZoneId.systemDefault()));
+			Calendar x = Calendar.getInstance();
+			x.setTime(Date.from(instant));
+			sel.setBirthDate(x);
+		}
+		if (txtBaseSalary.getText() == null || txtBaseSalary.getText().trim().equals("")) {
+			exception.addError("baseSalary", "Field can't be empty");
+		}
+		sel.setBaseSalary(Utils.tryParseToDouble(txtBaseSalary.getText()));
+
+		sel.setDepartment(comboBoxDepartment.getValue());
+		
 		if (exception.getErrors().size() > 0) {
 			throw exception;
 		}
-		return dep;
+		return sel;
 	}
 
 	@FXML
@@ -164,8 +188,8 @@ public class SellerFormController implements Initializable {
 		txtBaseSalary.setText(String.format("%.2f", entity.getBaseSalary()));
 		Calendar x = entity.getBirthDate();
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-		String s = sdf.format(x.getTime());
 		if (x != null) {
+			String s = sdf.format(x.getTime());
 			dpBirthDate.setValue(LOCAL_DATE(String.valueOf(s)));
 		}
 		if (entity.getDepartment() == null) {
@@ -192,9 +216,10 @@ public class SellerFormController implements Initializable {
 
 	private void setErrorMessages(Map<String, String> errors) {
 		Set<String> fields = errors.keySet();
-		if (fields.contains("name")) {
-			lblErrorName.setText(errors.get("name"));
-		}
+		lblErrorName.setText((fields.contains("name") ? errors.get("name") : ""));
+		lblErrorEmail.setText((fields.contains("email") ? errors.get("email") : ""));
+		lblErrorBaseSalary.setText((fields.contains("baseSalary") ? errors.get("baseSalary") : ""));
+		lblErrorBirthDate.setText((fields.contains("birthDate") ? errors.get("birthDate") : ""));
 	}
 
 	private void initializeComboBoxDepartment() {
