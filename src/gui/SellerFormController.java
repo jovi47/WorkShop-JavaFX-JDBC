@@ -68,6 +68,9 @@ public class SellerFormController implements Initializable {
 	private Label lblErrorBaseSalary;
 
 	@FXML
+	private Label lblErrorDepartment;
+
+	@FXML
 	private Button btSave;
 
 	@FXML
@@ -109,7 +112,7 @@ public class SellerFormController implements Initializable {
 		if (entity == null) {
 			throw new IllegalStateException("Entity was null");
 		}
-		if (entity == null) {
+		if (service == null) {
 			throw new IllegalStateException("Service was null");
 		}
 		try {
@@ -150,13 +153,18 @@ public class SellerFormController implements Initializable {
 			x.setTime(Date.from(instant));
 			sel.setBirthDate(x);
 		}
-		if (txtBaseSalary.getText() == null || txtBaseSalary.getText().trim().equals("")) {
-			exception.addError("baseSalary", "Field can't be empty");
+		String salaryText = txtBaseSalary.getText();
+		Double baseSalary = salaryText == null ? null : Utils.tryParseToDouble(salaryText);
+		if (baseSalary == null || !Double.isFinite(baseSalary)) {
+			exception.addError("baseSalary", "Enter a valid salary");
 		}
-		sel.setBaseSalary(Utils.tryParseToDouble(txtBaseSalary.getText()));
+		sel.setBaseSalary(baseSalary);
 
-		sel.setDepartment(comboBoxDepartment.getValue());
-		
+		Department department = comboBoxDepartment.getValue();
+		if (department == null) {
+			exception.addError("department", "Choose a department");
+		}
+		sel.setDepartment(department);
 		if (exception.getErrors().size() > 0) {
 			throw exception;
 		}
@@ -220,6 +228,7 @@ public class SellerFormController implements Initializable {
 		lblErrorEmail.setText((fields.contains("email") ? errors.get("email") : ""));
 		lblErrorBaseSalary.setText((fields.contains("baseSalary") ? errors.get("baseSalary") : ""));
 		lblErrorBirthDate.setText((fields.contains("birthDate") ? errors.get("birthDate") : ""));
+		lblErrorDepartment.setText((fields.contains("department") ? errors.get("department") : ""));
 	}
 
 	private void initializeComboBoxDepartment() {

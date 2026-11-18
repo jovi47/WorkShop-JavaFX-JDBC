@@ -33,3 +33,5 @@ nbdist/
 
 # Eclipse
 .settings/
+# Local MySQL connection and credentials
+/db.properties
